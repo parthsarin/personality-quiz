@@ -8,6 +8,7 @@ their similarity to others that have taken the quiz before.
 """
 from flask import Flask, render_template
 from .quiz_api.metadata import get_metadata
+from .quiz_api import quiz
 
 app = Flask(__name__)
 
@@ -19,3 +20,5 @@ def index():
     quizzes = get_metadata()
 
     return render_template('index.html', quizzes=quizzes)
+
+app.register_blueprint(quiz)
