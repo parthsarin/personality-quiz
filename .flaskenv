@@ -1,0 +1,2 @@
+FLASK_APP=personality-quiz
+FLASK_ENV=development
