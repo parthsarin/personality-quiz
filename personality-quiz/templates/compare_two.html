@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% set curr = results['curr_user'] %}
+{% set other = results['other_user'] %}
+
+
+{% block title %}
+{{ metadata['name'] }} | Comparing {{ curr['name'] }}'s Results with {{ other['name'] }}'s Results
+{% endblock title %}
+
+{% block body %}
+<div class="container mt-2">
+    <h1>Comparing {{ curr['name'] }}'s Results with {{ other['name'] }}'s Results</h1>
+    <p class="lead">Quiz: {{ metadata['name'] }}</p>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Question</th>
+                <th scope="col">Your Answer</th>
+                <th scope="col">{{ other['name'] }}'s Answer</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key, question in questions %}
+            <tr>
+                <td>{{ question['right'] }} (vs. {{ question['left'] }})</td>
+                <td>{{ curr.get(key|string) }}</td>
+                <td>{{ other.get(key|string) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock body %}

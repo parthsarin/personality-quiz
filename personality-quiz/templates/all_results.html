@@ -23,7 +23,14 @@
             {% set similarity = result['similarity'] * 100 %}
             <tr 
                 style="cursor: pointer;" 
-                {# onclick="window.location.href = {{ url_for() }}" #}
+                onclick="window.location.href = '{{ 
+                    url_for(
+                        'personality-quiz.quiz_api.compare_results', 
+                        slug=metadata['slug'],
+                        curr_id=curr_id,
+                        other_id=result['other_id']
+                    ) 
+                }}'"
             >
                 <td>{{ i + 1 }}</td>
                 <td>{{ '%0.2f' % similarity | float }}</td>

@@ -46,7 +46,7 @@ def pearson_correlation(pairs: Collection[Tuple[float, float]]) -> float:
 def compare_two(slug: str,
                 curr_id: int,
                 other_id: int,
-                expanded: bool = False) -> ComparisonObject:
+                expanded: bool = False) -> Union[ComparisonObject, None]:
     """
     Compares two user submissions, computes the Pearson correlation between
     their responses, and returns that as a ComparisonObject.
@@ -61,21 +61,14 @@ def compare_two(slug: str,
 
     Returns
     -------
-    The comparison between the two users.
+    The comparison between the two users or None if the input is malformed.
     """
     curr = get_submission_for_form(slug, curr_id)
     other = get_submission_for_form(slug, other_id)
 
     if curr is None or other is None:
         # One of these is not in the database
-        output: ComparisonObject = {
-            'similarity': 0,
-            'curr_user': '',
-            'other_id': other_id,
-            'other_user': '',
-            'other_time': None
-        }
-        return output
+        return None
     
     # Compile the responses for each of the users
     key_order = [k for k, v in curr.items() if isinstance(v, Number)]
