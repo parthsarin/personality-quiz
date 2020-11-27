@@ -4,8 +4,9 @@ File: __init__.py
 
 Handles the quiz endpoints.
 """
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from .metadata import get_config, QuizCategories, meta_from_parser
+from .db import add_quiz_submission, get_submissions_for
 
 quiz = Blueprint(__name__, 'quiz')
 
@@ -41,3 +42,17 @@ def submit_quiz(slug: str):
     """
     Handles the quiz submission.
     """
+    submission = dict(request.form)
+    for k, v in submission.items():
+        # Convert the slider answers to integers
+        if not k == 'name':
+            try:
+                submission[k] = int(v)
+            except ValueError:
+                pass
+    
+    # Write to the database
+    add_quiz_submission(slug, submission)
+
+    # Redirect to the results
+    return 'Awesome!'

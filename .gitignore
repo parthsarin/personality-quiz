@@ -1,5 +1,6 @@
 # Quiz results
 results.db
+*.db_unqlite_journal
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
