@@ -109,7 +109,8 @@ def all_results(slug: str,
     # Compare this record with all of the other ones
     output = []
     for other_id in range(n+1):
-        if (comparison := compare_two(slug, record_id, other_id, expanded)):
+        comparison = compare_two(slug, record_id, other_id, expanded)
+        if comparison:
             output.append(comparison)
 
     print(output)
