@@ -3,6 +3,18 @@
 {% set curr = results['curr_user'] %}
 {% set other = results['other_user'] %}
 
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/graph.css') }}" />
+{% endblock css %}
+
+{% block meta %}
+<meta 
+    id="quiz-data" 
+    data-questions="" 
+    data-curr="" 
+    data-other="{{ other }}" 
+/>
+{% endblock meta %}
 
 {% block title %}
 {{ metadata['name'] }} | Comparing {{ curr['name'] }}'s Results with {{ other['name'] }}'s Results
@@ -12,6 +24,13 @@
 <div class="container mt-2">
     <h1>Comparing {{ curr['name'] }}'s Results with {{ other['name'] }}'s Results</h1>
     <p class="lead">Quiz: {{ metadata['name'] }}</p>
+    <div class="row mb-3">
+        <div class="col">
+            <div class="d-flex justify-content-center" id="graph-container">
+                <div id="comparison-graph"></div>
+            </div>
+        </div>
+    </div>
     <table class="table table-hover">
         <thead>
             <tr>
@@ -30,5 +49,121 @@
         {% endfor %}
         </tbody>
     </table>
+    <div class="row">
+        <div class="col text-center">
+            <a 
+                href="{{ url_for('personality-quiz.quiz_api.all_comparisons', slug=metadata['slug'], record_id=curr_id) }}" 
+                class="font-italic"
+            >See all of {{ curr['name'] }}'s results for {{ metadata['name'] }}</a><br />
+            <a href="{{ url_for('index') }}" class="font-italic">Take another quiz!</a>
+        </div>
+    </div>
 </div>
 {% endblock body %}
+
+{% block js %}
+{% set granularity = metadata["granularity"] %}
+{% set other_name = other['name'] %}
+<script src="https://d3js.org/d3.v4.js"></script>
+<script type="text/javascript">
+const questions = {{ dict(questions)|tojson|safe }};
+const curr = {{ dict(curr)|tojson|safe }};
+const other = {{ dict(other)|tojson|safe }};
+const maxValue = {{ granularity|safe }};
+
+// Graph configuration
+const margin = {top: 10, right: 30, bottom: 50, left: 50},
+      width = 460 - margin.left - margin.right,
+      height = 420 - margin.top - margin.bottom;
+
+// Add graph to the DOM
+const svg = d3.select("#comparison-graph")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// Axes
+const x = d3.scaleLinear()
+    .domain([0, maxValue])
+    .range([0, width]);
+const y = d3.scaleLinear()
+    .domain([0, maxValue])
+    .range([height, 0]);
+
+svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+svg.append("text")             
+    .attr("transform",
+          "translate(" + (width/2) + " ," + 
+                         (height + margin.top + 30) + ")")
+    .style("text-anchor", "middle")
+    .text("Your Answers");
+
+svg.append("g")
+    .call(d3.axisLeft(y));
+svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left)
+    .attr("x",0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("{{ other_name }}'s Answers");
+
+// Add data
+const graph = svg.append('g');
+const tooltip = d3.select("body").append("div")
+     .attr("class", "tooltip")
+     .style("opacity", 0);
+
+for (const key in questions) {
+    const userAns = curr[key];
+    const otherAns = other[key];
+
+    graph.append("circle")
+        .attr("cx", x(userAns))
+        .attr("cy", y(otherAns))
+        .attr("r", 5)
+        .style("fill", "#9370DB")
+        .on('mouseover', function () {
+            // Animate larger
+            d3.select(this).transition()
+                .duration('100')
+                .attr("r", 9);
+            
+            // Animate tooltip in
+            tooltip.transition()
+               .duration(100)
+               .style("opacity", 1);
+
+            tooltip.html(`
+                    <div id="tooltip-header" class="w-100 text-center">
+                    <span class="font-italic">
+                        ${questions[key]['right']} (vs. ${questions[key]['left']})
+                    </span>
+                    </div>
+                    Your Answer: ${userAns}<br />
+                    {{ other_name }}'s Answer: ${otherAns}
+                `)
+               .style("left", (d3.event.pageX + 20) + "px")
+               .style("top", (d3.event.pageY - 15) + "px");
+
+        })
+        .on('mouseout', function () {
+            // Animate smaller
+            d3.select(this).transition()
+                .duration('200')
+                .attr("r", 5);
+
+            // Animate tooltip out
+            tooltip.transition()
+               .duration('200')
+               .style("opacity", 0);
+
+        });
+}
+</script>
+{% endblock js %}

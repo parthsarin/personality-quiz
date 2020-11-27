@@ -94,11 +94,12 @@ def compare_results(slug: str, curr_id: int, other_id: int):
     # Convert keys to strings so that we can safely subscript
     for user in ('curr_user', 'other_user'):
         for k, v in list(results[user].items()):
+            del results[user][k]
             results[user][str(k)] = v
 
     return render_template(
         "compare_two.html",
-        metadata=metadata, questions=questions, results=results
+        metadata=metadata, questions=questions, results=results, curr_id=curr_id
     )
 
 

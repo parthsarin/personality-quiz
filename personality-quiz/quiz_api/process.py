@@ -109,7 +109,14 @@ def all_results(slug: str,
     # Compare this record with all of the other ones
     output = []
     for other_id in range(n+1):
-        output.append(compare_two(slug, record_id, other_id, expanded))
-    
+        if (comparison := compare_two(slug, record_id, other_id, expanded)):
+            output.append(comparison)
+
+    print(output)
+
     # Sort in order of increasing similarity
-    return sorted(output, key=lambda c: c['similarity'], reverse=True)
+    return sorted(
+        output, 
+        key=lambda c: c['similarity'] if c else -1, 
+        reverse=True
+    )
