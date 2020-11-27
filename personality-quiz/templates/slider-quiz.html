@@ -51,10 +51,10 @@ Quiz: {{ metadata['name'] }} ({{ metadata['author'] }})
                 {% endif %}
                 <div class="row mb-1 slider-labels">
                     <div class="col">
-                    {{ question['left'] }} (<span id="left-{{ key }}">{{ metadata['granularity'] // 2 }}</span>)
+                    {{ question['left'] }} (<span id="left-{{ key }}">{{ metadata['granularity'] - metadata['granularity'] // 2 }}</span>)
                     </div>
                     <div class="col text-right">
-                    {{ question['right'] }} (<span id="right-{{ key }}">{{ metadata['granularity'] - metadata['granularity'] // 2 }}</span>)
+                    {{ question['right'] }} (<span id="right-{{ key }}">{{ metadata['granularity'] // 2 }}</span>)
                     </div>
                 </div>
                 <div class="row">
@@ -112,8 +112,8 @@ const validateForm = () => {
 
 // Update the left and right labels every time the slider moves
 const updateLeftRight = (val, leftId, rightId) => {
-    document.getElementById(leftId).innerHTML = val;
-    document.getElementById(rightId).innerHTML = {{ metadata['granularity'] }} - val;
+    document.getElementById(rightId).innerHTML = val;
+    document.getElementById(leftId).innerHTML = {{ metadata['granularity'] }} - val;
 }
 </script>
 {% endblock js %}

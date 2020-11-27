@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ metadata['name'] }} | Results for {{ curr['name'] }}
+{% endblock title %}
+
+{% block body %}
+<div class="container mt-2">
+    <h1>{{ curr['name'] }}'s Results</h1>
+    <p class="lead">Quiz: {{ metadata['name'] }}</p>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Similarity</th>
+                <th scope="col">Name</th>
+                <th scope="col">Submission Time</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i, result in results %}
+            {% set similarity = result['similarity'] * 100 %}
+            <tr 
+                style="cursor: pointer;" 
+                {# onclick="window.location.href = {{ url_for() }}" #}
+            >
+                <td>{{ i + 1 }}</td>
+                <td>{{ '%0.2f' % similarity | float }}</td>
+                <td>{{ result['other_user'] }}</td>
+                <td>{{ result['other_time'] }}</td>
+                <td>
+                <img
+                    src="{{ url_for('static', filename='img/chevron.svg') }}"
+                />
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col text-center">
+            <a href="{{ url_for('index') }}" class="font-italic">Take another quiz!</a>
+        </div>
+    </div>
+</div>
+{% endblock body %}

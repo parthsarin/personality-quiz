@@ -4,9 +4,10 @@ File: __init__.py
 
 Handles the quiz endpoints.
 """
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, redirect, url_for
 from .metadata import get_config, QuizCategories, meta_from_parser
-from .db import add_quiz_submission, get_submissions_for
+from .db import add_quiz_submission, get_submission_for_form
+from .process import all_results
 
 quiz = Blueprint(__name__, 'quiz')
 
@@ -37,6 +38,34 @@ def get_quiz(slug: str):
                                questions=questions)
 
 
+@quiz.route('/result/<slug>/<int:record_id>', methods=['GET'])
+def all_comparisons(slug: str, record_id: int):
+    """
+    Compares this submission to all other submissions for the form.
+    """
+    # Metadata
+    quiz = get_config(slug)
+    
+    if not quiz:
+        return render_template("404.html"), 404
+
+    metadata = quiz[QuizCategories.META]
+    metadata = meta_from_parser(metadata)
+
+    # Results
+    curr = get_submission_for_form(slug, record_id)
+    
+    if not curr:
+        return render_template("404.html"), 404
+    
+    results = all_results(slug, record_id, expanded=False)
+
+    return render_template(
+        'all_results.html', 
+        curr=curr, slug=slug, results=enumerate(results), metadata=metadata
+    )
+
+
 @quiz.route('/quiz/submit/<slug>', methods=['POST'])
 def submit_quiz(slug: str):
     """
@@ -52,7 +81,10 @@ def submit_quiz(slug: str):
                 pass
     
     # Write to the database
-    add_quiz_submission(slug, submission)
+    submission_id = add_quiz_submission(slug, submission)
 
     # Redirect to the results
-    return 'Awesome!'
+    return redirect(
+        url_for('personality-quiz.quiz_api.all_comparisons',
+                slug=slug, record_id=submission_id)
+    )

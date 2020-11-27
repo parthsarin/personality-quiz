@@ -19,9 +19,13 @@ def connect():
     return UnQLite(DB_PATH.format(root=current_app.root_path))
 
 
-def add_quiz_submission(slug: str, submission: Dict):
+def add_quiz_submission(slug: str, submission: Dict) -> int:
     """
     Adds the quiz submission to the database.
+
+    Returns
+    -------
+    The id of the added submission
     """
     db = connect()
 
@@ -30,10 +34,12 @@ def add_quiz_submission(slug: str, submission: Dict):
     with db.transaction():
         submissions = db.collection(slug)
         submissions.create()
-        submissions.store([submission])
+        output = submissions.store([submission], return_id=True)
+    
+    return output
 
 
-def get_submissions_for(slug: str):
+def get_submissions_for_form(slug: str):
     """
     Returns all submissions to the specified form.
     """
@@ -47,3 +53,37 @@ def get_submissions_for(slug: str):
         del submission['__id']
     
     return submissions
+
+
+def get_submission_for_form(slug: str, record_id: int):
+    """
+    Returns the specified submission for the form or None if the record doesn't
+    exist.
+    """
+    db = connect()
+
+    with db.transaction():
+        submissions = db.collection(slug)
+        output = submissions.fetch(record_id)
+    
+    if output:
+        del output['__id']
+    
+    return output
+
+
+def get_num_submissions(slug: str) -> int:
+    """
+    Returns the number of submissions to a form.
+    """
+    db = connect()
+
+    with db.transaction():
+        submissions = db.collection(slug)
+        
+        if not submissions.exists():
+            return None
+        
+        last_id = submissions.last_record_id()
+    
+    return last_id + 1
