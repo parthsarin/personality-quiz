@@ -4,28 +4,116 @@
 Quiz: {{ metadata['name'] }} ({{ metadata['author'] }})
 {% endblock title %}
 
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/slider.css') }}" />
+{% endblock css %}
+
 {% block body %}
-<div class="container">
+<div class="container mt-2">
     <h1 class="mb-0">{{ metadata['name'] }}</h1>
     <p class="font-italic">By {{ metadata['author'] }}</p>
 
     <p class="lead">{{ metadata['description'] }}</p>
 
-    {% for i, key, question in questions %}
-    <div class="card mb-2">
-        {% if question['img'] %}
-        <img class="card-img-top" src="{{ question['img'] }}" alt="{{ question['img_alt'] }}">
-        {% else %}
-        <div class="card-body">
-            <p class="font-italic">Question {{ i + 1 }}</p>
-            {% if question['prompt'] %}
-            <h2 class="card-title mb-0 h5">{{ question['prompt'] }}</h2>
-            {% endif %}
-            {{ question['left'] }}
-            {{ question['right'] }}
+    {% if metadata['header_prompt'] %}
+    <div class="alert alert-info" role="alert">
+        {{ metadata['header_prompt'] }}
+    </div>
+    {% endif %}
+
+    <form action="/quiz/submit/{{ metadata['slug'] }}" onsubmit="return validateForm();" name="quiz" method="POST">
+        <div class="card mb-2">
+            <div class="card-body">
+                <div class="alert alert-danger d-none" id="empty-name-error">
+                    The name can't be empty.
+                </div>
+                <label class="font-italic" for="name" id="name-label">Enter your name:</label>
+                <input
+                    id="name"
+                    name="name"
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Minerva McGonagall" 
+                    aria-label="Name" 
+                    aria-describedby="name-label"
+                />
+            </div>
         </div>
-        {% endif %}
-    </div> 
-    {% endfor %}
+        {% for i, key, question in questions %}
+        <div class="card mb-2">
+            {% if question['img'] %}
+            <img class="card-img-top" src="{{ question['img'] }}" alt="{{ question['img_alt'] }}">
+            {% else %}
+            <div class="card-body">
+                <p class="font-italic">Question {{ i + 1 }}</p>
+                {% if question['prompt'] %}
+                <h2 class="card-title mb-0 h5">{{ question['prompt'] }}</h2>
+                {% endif %}
+                <div class="row mb-1 slider-labels">
+                    <div class="col">
+                    {{ question['left'] }} (<span id="left-{{ key }}">{{ metadata['granularity'] // 2 }}</span>)
+                    </div>
+                    <div class="col text-right">
+                    {{ question['right'] }} (<span id="right-{{ key }}">{{ metadata['granularity'] - metadata['granularity'] // 2 }}</span>)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="slide-container">
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max="{{ metadata['granularity'] }}"
+                                value="{{ metadata['granularity'] // 2 }}"
+                                class="slider"
+                                id="slider-{{ key }}"
+                                name="{{ key }}"
+                                oninput="updateLeftRight(this.value, 'left-{{ key }}', 'right-{{ key }}')"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div> 
+        {% endfor %}
+
+        <div class="row">
+            <div class="col">
+                <button
+                    type="submit"
+                    class="btn btn-primary float-right"
+                    id="submit-button"
+                    role="submit"
+                >
+                    Submit!
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
 {% endblock body %}
+
+{% block js %}
+<script type="text/javascript">
+const validateForm = () => {
+    const name = document.forms["quiz"]["name"].value;
+    
+    if (!name) {
+        document.getElementById("name").classList.add('has-error');
+        document.getElementById("empty-name-error").classList.remove('d-none');
+
+        setTimeout(() => {
+            document.getElementById("name").classList.remove('has-error');
+        }, 800);
+        return false;
+    }
+}
+
+// Update the left and right labels every time the slider moves
+const updateLeftRight = (val, leftId, rightId) => {
+    document.getElementById(leftId).innerHTML = val;
+    document.getElementById(rightId).innerHTML = {{ metadata['granularity'] }} - val;
+}
+</script>
+{% endblock js %}

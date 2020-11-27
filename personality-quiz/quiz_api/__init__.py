@@ -34,3 +34,10 @@ def get_quiz(slug: str):
         return render_template('slider-quiz.html', 
                                metadata=metadata, 
                                questions=questions)
+
+
+@quiz.route('/quiz/submit/<slug>', methods=['POST'])
+def submit_quiz(slug: str):
+    """
+    Handles the quiz submission.
+    """

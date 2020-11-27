@@ -27,7 +27,9 @@ class QuizMetadata(TypedDict):
     date: Union[datetime, None]
     img: Union[str, None]
     slug: str
+    granularity: int
     question_type: Union[QuizCategories.SLIDER, QuizCategories.MULTIPLE_CHOICE]
+    header_prompt: Union[str, None]
 
 
 def meta_from_parser(parser: configparser.ConfigParser) -> QuizMetadata:
@@ -41,7 +43,9 @@ def meta_from_parser(parser: configparser.ConfigParser) -> QuizMetadata:
         'date': parser.get('date'),
         'img': parser.get('img'),
         'slug': parser.get('slug'),
-        'question_type': parser.get('question_type')
+        'granularity': int(parser.get('granularity', 100)),
+        'question_type': parser.get('question_type'),
+        'header_prompt': parser.get('header_prompt')
     }
 
     return metadata
