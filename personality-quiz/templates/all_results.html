@@ -20,7 +20,7 @@
         </thead>
         <tbody>
             {% for i, result in results %}
-            {% set similarity = result['similarity'] * 100 %}
+            {% set similarity = result['similarity'] %}
             <tr 
                 style="cursor: pointer;" 
                 onclick="window.location.href = '{{ 
@@ -33,7 +33,7 @@
                 }}'"
             >
                 <td>{{ i + 1 }}</td>
-                <td>{{ '%0.2f' % similarity | float }}</td>
+                <td>{{ "{:.1f}".format(similarity) }}%</td>
                 <td>{{ result['other_user'] }}</td>
                 <td>{{ result['other_time'] }}</td>
                 <td>

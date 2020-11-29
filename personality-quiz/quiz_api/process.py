@@ -38,9 +38,9 @@ def pearson_correlation(pairs: Collection[Tuple[float, float]]) -> float:
     denominator **= (1/2)
 
     try:
-        return abs(numerator / denominator)
+        return (1 + numerator / denominator) * 50
     except ZeroDivisionError:
-        return -1
+        return 0
 
 
 def compare_two(slug: str,
@@ -118,6 +118,6 @@ def all_results(slug: str,
     # Sort in order of increasing similarity
     return sorted(
         output, 
-        key=lambda c: c['similarity'] if c else -1, 
+        key=lambda c: c['similarity'] if c else 0, 
         reverse=True
     )
